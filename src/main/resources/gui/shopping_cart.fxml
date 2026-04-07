@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.shoppingcart.controller.ShoppingCartController"
+      alignment="TOP_CENTER" prefWidth="600" prefHeight="500">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Language Selection -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblLanguage" style="-fx-font-weight: bold;"/>
+        <ChoiceBox fx:id="choiceLanguage" prefWidth="120"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Number of Items Input -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblNumItems"/>
+        <TextField fx:id="txtNumItems" prefWidth="150"/>
+        <Button fx:id="btnGenerate" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Dynamic Items Container -->
+    <ScrollPane fitToWidth="true" prefHeight="250">
+        <VBox fx:id="itemsContainer" spacing="8"/>
+    </ScrollPane>
+
+    <Separator/>
+
+    <!-- Calculate Button and Total -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button fx:id="btnCalculate" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <Label fx:id="lblTotal" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    </HBox>
+
+</VBox>
