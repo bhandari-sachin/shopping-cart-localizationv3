@@ -22,9 +22,12 @@
 
     <!-- Number of Items Input -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label fx:id="lblNumItems"/>
-        <TextField fx:id="txtNumItems" prefWidth="150"/>
-        <Button fx:id="btnGenerate" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+        <Label fx:id="lblNumItems" text="Number of items:"/>
+        <TextField fx:id="txtNumItems" prefWidth="150" promptText="Enter number (1-50)"/>
+        <Button fx:id="btnGenerate"
+                text="Generate Items"
+                onAction="#generateItemFields"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
     </HBox>
 
     <Separator/>
@@ -38,8 +41,11 @@
 
     <!-- Calculate Button and Total -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Button fx:id="btnCalculate" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <Label fx:id="lblTotal" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Button fx:id="btnCalculate"
+                text="Calculate Total"
+                onAction="#calculateTotal"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <Label fx:id="lblTotal" text="Total Cost: 0.00" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
     </HBox>
 
 </VBox>

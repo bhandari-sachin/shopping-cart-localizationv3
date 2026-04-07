@@ -13,7 +13,7 @@ public class MainApp extends Application {
         Scene scene = new Scene(loader.load());
 
         stage.setScene(scene);
-        stage.setTitle("Shopping Cart");
+        stage.setTitle("sachinbh//shopping Cart");
         stage.setMinWidth(600);
         stage.setMinHeight(400);
         stage.show();

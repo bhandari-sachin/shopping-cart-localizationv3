@@ -34,6 +34,8 @@ public class ShoppingCartController {
 
     @FXML
     public void initialize() {
+        System.out.println("Controller initializing..."); // Debug
+
         // Initialize language choice box
         choiceLanguage.getItems().addAll("English", "Finnish", "Swedish", "Japanese", "Arabic");
         choiceLanguage.setValue("English");
@@ -45,6 +47,11 @@ public class ShoppingCartController {
         // Language change listener
         choiceLanguage.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldVal, newVal) -> switchLanguage(newVal));
+
+        // Set prompt text for number input
+        txtNumItems.setPromptText("Enter number (1-50)");
+
+        System.out.println("Controller initialized successfully"); // Debug
     }
 
     private void switchLanguage(String language) {
@@ -93,8 +100,20 @@ public class ShoppingCartController {
 
     @FXML
     public void generateItemFields() {
+        System.out.println("Generate button clicked!"); // Debug
+
         try {
-            int numItems = Integer.parseInt(txtNumItems.getText().trim());
+            String input = txtNumItems.getText().trim();
+            System.out.println("Input value: '" + input + "'"); // Debug
+
+            if (input.isEmpty()) {
+                showError("Please enter a number");
+                return;
+            }
+
+            int numItems = Integer.parseInt(input);
+            System.out.println("Parsed number: " + numItems); // Debug
+
             if (numItems <= 0) {
                 showError("error.positive.number");
                 return;
@@ -124,15 +143,20 @@ public class ShoppingCartController {
                 itemFields.add(new TextField[]{priceField, qtyField});
             }
 
+            System.out.println("Generated " + numItems + " item fields"); // Debug
+
         } catch (NumberFormatException e) {
+            System.err.println("Number format error: " + e.getMessage()); // Debug
             showError("error.invalid.number");
         }
     }
 
     @FXML
     public void calculateTotal() {
+        System.out.println("Calculate button clicked!"); // Debug
+
         if (itemFields.isEmpty()) {
-            showError("error.invalid.number");
+            showError("No items to calculate. Please generate items first.");
             return;
         }
 
@@ -140,8 +164,16 @@ public class ShoppingCartController {
 
         for (TextField[] fields : itemFields) {
             try {
-                double price = Double.parseDouble(fields[0].getText().trim());
-                int quantity = Integer.parseInt(fields[1].getText().trim());
+                String priceText = fields[0].getText().trim();
+                String qtyText = fields[1].getText().trim();
+
+                if (priceText.isEmpty() || qtyText.isEmpty()) {
+                    showError("Please fill in all price and quantity fields");
+                    return;
+                }
+
+                double price = Double.parseDouble(priceText);
+                int quantity = Integer.parseInt(qtyText);
 
                 if (price <= 0 || quantity <= 0) {
                     showError("error.positive.number");
@@ -159,22 +191,35 @@ public class ShoppingCartController {
         double total = calculator.calculateTotal(items);
         lblTotal.setText(messages.getOrDefault("total.cost", "Total Cost:") + String.format(" %.2f", total));
 
-        // Save to database
-        cartService.saveCart(items.size(), total, currentLanguage, items);
+        // Save to database (comment out if database not working yet)
+        try {
+            cartService.saveCart(items.size(), total, currentLanguage, items);
 
-        // Show success message
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText("Cart saved to database successfully!");
-        alert.showAndWait();
+            // Show success message
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Cart saved to database successfully!");
+            alert.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Database save error: " + e.getMessage());
+            // Still show total even if database save fails
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText(null);
+            alert.setContentText("Total calculated: " + String.format("%.2f", total) +
+                    "\nBut failed to save to database: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     private void showError(String messageKey) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(null);
-        alert.setContentText(messages.getOrDefault(messageKey, "Invalid input"));
+        String message = messages != null ?
+                messages.getOrDefault(messageKey, messageKey) : messageKey;
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }
