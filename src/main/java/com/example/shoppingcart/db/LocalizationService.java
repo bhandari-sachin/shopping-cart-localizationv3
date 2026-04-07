@@ -20,10 +20,12 @@ public class LocalizationService {
             while (rs.next()) {
                 messages.put(rs.getString("key"), rs.getString("value"));
             }
+            rs.close();
 
         } catch (SQLException e) {
-            System.err.println("LocalizationService error: " + e.getMessage());
-            // Return fallback English strings
+            System.err.println("LocalizationService error retrieving strings for language '" + language + "': " + e.getMessage());
+            e.printStackTrace();
+            // Return fallback English strings when database is unavailable
             return getFallbackStrings();
         }
 

@@ -26,7 +26,8 @@ public class CartService {
             }
 
         } catch (SQLException e) {
-            System.err.println("CartService error: " + e.getMessage());
+            System.err.println("CartService error while saving cart: " + e.getMessage());
+            System.err.println("Failed to save cart with " + totalItems + " items and total cost " + totalCost);
             e.printStackTrace();
         }
     }
@@ -46,7 +47,7 @@ public class CartService {
                 ps.setDouble(5, subtotal);
                 ps.executeUpdate();
             }
-            System.out.println("Saved " + items.size() + " cart items");
+            System.out.println("Saved " + items.size() + " cart items for cart ID: " + cartId);
         }
     }
 }
