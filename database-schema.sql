@@ -4,11 +4,7 @@ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE shopping_cart_localization;
 
--- Option 1: If using root user, skip user creation or update it
--- Option 2: Create a dedicated user (uncomment if needed)
--- CREATE USER IF NOT EXISTS 'shopping_cart'@'localhost' IDENTIFIED BY 'shopping_cart_password';
--- GRANT ALL PRIVILEGES ON shopping_cart_localization.* TO 'shopping_cart'@'localhost';
--- FLUSH PRIVILEGES;
+
 
 -- Cart Records Table
 CREATE TABLE IF NOT EXISTS cart_records (
@@ -39,7 +35,7 @@ CREATE TABLE IF NOT EXISTS localization_strings (
     UNIQUE KEY unique_key_language (`key`, language)
     );
 
--- Insert all localization strings (same as before)
+-- Insert  localization strings
 INSERT IGNORE INTO localization_strings (`key`, value, language) VALUES
 ('select.language', 'Select Language:', 'en'),
 ('prompt.num.items', 'Number of items:', 'en'),
