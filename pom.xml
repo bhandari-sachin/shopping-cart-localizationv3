@@ -16,6 +16,19 @@
         <junit.jupiter.version>5.11.0</junit.jupiter.version>
         <jacoco.version>0.8.12</jacoco.version>
         <javafx.version>21.0.2</javafx.version>
+
+        <!-- SonarQube Properties -->
+        <sonar.projectKey>shopping-cart-localization</sonar.projectKey>
+        <sonar.projectName>Shopping Cart Localization</sonar.projectName>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.java.binaries>target/classes</sonar.java.binaries>
+        <sonar.sources>src/main/java</sonar.sources>
+        <sonar.tests>src/test/java</sonar.tests>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <!-- Exclude JavaFX module-info from analysis -->
+        <sonar.exclusions>**/module-info.java</sonar.exclusions>
     </properties>
 
     <dependencies>
@@ -39,7 +52,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.4.0</version>
+            <version>9.3.0</version>
         </dependency>
 
         <!-- SLF4J simple binding to eliminate warnings -->
@@ -87,18 +100,20 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo -->
+            <!-- JaCoCo: coverage agent + HTML + XML reports for SonarQube -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <executions>
+                    <!-- Instrument bytecode before tests run -->
                     <execution>
                         <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
+                    <!-- HTML report (prepare-package phase) -->
                     <execution>
                         <id>report</id>
                         <phase>prepare-package</phase>
@@ -106,7 +121,28 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!-- XML report (verify phase) — required by SonarQube -->
+                    <execution>
+                        <id>jacoco-xml-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <formats>
+                                <format>XML</format>
+                            </formats>
+                            <outputDirectory>target/site/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+
+            <!-- SonarQube Maven Plugin -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
             </plugin>
 
             <!-- Fat JAR -->
