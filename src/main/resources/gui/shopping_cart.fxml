@@ -14,19 +14,19 @@
 
     <!-- Language Selection -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label fx:id="lblLanguage" style="-fx-font-weight: bold;"/>
-        <ChoiceBox fx:id="choiceLanguage" prefWidth="120"/>
+        <Label fx:id="languageLabel" style="-fx-font-weight: bold;"/>
+        <ChoiceBox fx:id="languageChoiceBox" prefWidth="120"/>
     </HBox>
 
     <Separator/>
 
     <!-- Number of Items Input -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label fx:id="lblNumItems" text="Number of items:"/>
-        <TextField fx:id="txtNumItems" prefWidth="150" promptText="Enter number (1-50)"/>
-        <Button fx:id="btnGenerate"
+        <Label fx:id="itemCountLabel" text="Number of items:"/>
+        <TextField fx:id="itemCountField" prefWidth="150" promptText="Enter number (1-50)"/>
+        <Button fx:id="generateItemsButton"
                 text="Generate Items"
-                onAction="#generateItemFields"
+                onAction="#handleGenerateItemsAction"
                 style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
     </HBox>
 
@@ -41,11 +41,11 @@
 
     <!-- Calculate Button and Total -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Button fx:id="btnCalculate"
+        <Button fx:id="calculateTotalButton"
                 text="Calculate Total"
-                onAction="#calculateTotal"
+                onAction="#handleCalculateTotalAction"
                 style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <Label fx:id="lblTotal" text="Total Cost: 0.00" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label fx:id="totalLabel" text="Total Cost: 0.00" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
     </HBox>
 
 </VBox>

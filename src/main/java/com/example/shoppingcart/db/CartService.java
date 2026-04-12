@@ -5,8 +5,19 @@ import com.example.shoppingcart.model.CartItem;
 import java.sql.*;
 import java.util.List;
 
+/**
+ * Persists shopping cart records and their items to the database.
+ */
 public class CartService {
 
+    /**
+     * Saves a cart record and its associated items.
+     *
+     * @param totalItems the number of items in the cart
+     * @param totalCost the total cart cost
+     * @param language the selected language code
+     * @param items the cart items to persist
+     */
     public void saveCart(int totalItems, double totalCost, String language, List<CartItem> items) {
         String cartSql = "INSERT INTO cart_records (total_items, total_cost, language) VALUES (?, ?, ?)";
 
@@ -22,7 +33,6 @@ public class CartService {
             if (generatedKeys.next()) {
                 int cartId = generatedKeys.getInt(1);
                 saveCartItems(conn, cartId, items);
-                System.out.println("Cart saved with ID: " + cartId);
             }
 
         } catch (SQLException e) {
@@ -47,7 +57,6 @@ public class CartService {
                 ps.setDouble(5, subtotal);
                 ps.executeUpdate();
             }
-            System.out.println("Saved " + items.size() + " cart items for cart ID: " + cartId);
         }
     }
 }

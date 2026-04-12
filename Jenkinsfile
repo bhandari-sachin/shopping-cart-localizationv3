@@ -1,40 +1,35 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven3'
+        jdk   'JDK21'
+    }
+
     environment {
-        // Ensure Jenkins can find Docker on Windows
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
+        DOCKERHUB_REPO_NAME     = 'shopping-cart-localization'
 
-        // Docker Hub credentials (set in Jenkins credentials store)
-        DOCKERHUB_CREDENTIALS_ID = '11de06b8-c29b-4e4c-bf92-2d6a8d92868e'
-
-        // Docker image repository
-        DOCKER_IMAGE_REPO = 'sachinbhandari/shopping-cart-localization'
-
-        // Image tags
+        DOCKER_IMAGE_TAG        = "build-${env.BUILD_NUMBER}"
         DOCKER_IMAGE_TAG_LATEST = 'latest'
-        DOCKER_IMAGE_TAG_BUILD  = "${env.BUILD_NUMBER}"
+
+        SONAR_PROJECT_KEY       = 'shopping-cart-localization'
+        SONAR_PROJECT_NAME      = 'shopping cart localization'
     }
 
     stages {
-        stage('Check Docker') {
-            steps {
-                bat 'docker --version'
-                bat 'docker info'
-            }
-        }
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/bhandari-sachin/shopping-cart-localization.git'
+                checkout scm
             }
         }
 
-        stage('Build and Test') {
+        stage('Build & Test') {
             steps {
                 bat 'mvn -B clean verify'
             }
+
             post {
                 always {
                     junit '**/target/surefire-reports/*.xml'
@@ -42,29 +37,41 @@ pipeline {
             }
         }
 
-        stage('Generate Coverage Report') {
+        stage('SonarQube Analysis') {
             steps {
-                bat 'mvn -B jacoco:report'
+                withSonarQubeEnv('SonarQubeServer') {
+                    bat """
+                        ${tool 'SonarScanner'}\\bin\\sonar-scanner ^
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} ^
+                        -Dsonar.projectName="${SONAR_PROJECT_NAME}" ^
+                        -Dsonar.sources=src/main/java ^
+                        -Dsonar.tests=src/test/java ^
+                        -Dsonar.java.binaries=target/classes ^
+                        -Dsonar.java.test.binaries=target/test-classes ^
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml ^
+                        -Dsonar.sourceEncoding=UTF-8
+                    """
+                }
             }
         }
 
-        stage('Publish Coverage Report') {
+        /*
+        OPTIONAL
+        stage('Quality Gate') {
             steps {
-                recordCoverage(
-                    tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml']],
-                    id: 'jacoco',
-                    name: 'JaCoCo Coverage',
-                    sourceCodeRetention: 'EVERY_BUILD'
-                )
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
+        */
 
         stage('Build Docker Image') {
             steps {
                 bat """
                     docker build ^
-                        -t %DOCKER_IMAGE_REPO%:%DOCKER_IMAGE_TAG_BUILD% ^
-                        -t %DOCKER_IMAGE_REPO%:%DOCKER_IMAGE_TAG_LATEST% .
+                        -t %DOCKER_USERNAME%/%DOCKERHUB_REPO_NAME%:%DOCKER_IMAGE_TAG% ^
+                        -t %DOCKER_USERNAME%/%DOCKERHUB_REPO_NAME%:%DOCKER_IMAGE_TAG_LATEST% .
                 """
             }
         }
@@ -77,9 +84,9 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat """
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        docker push %DOCKER_IMAGE_REPO%:%DOCKER_IMAGE_TAG_BUILD%
-                        docker push %DOCKER_IMAGE_REPO%:%DOCKER_IMAGE_TAG_LATEST%
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        docker push %DOCKER_USERNAME%/%DOCKERHUB_REPO_NAME%:%DOCKER_IMAGE_TAG%
+                        docker push %DOCKER_USERNAME%/%DOCKERHUB_REPO_NAME%:%DOCKER_IMAGE_TAG_LATEST%
                         docker logout
                     """
                 }
@@ -88,8 +95,14 @@ pipeline {
     }
 
     post {
+        success {
+            echo "Pipeline succeeded! Image: ${DOCKER_USERNAME}/${DOCKERHUB_REPO_NAME}:${DOCKER_IMAGE_TAG}"
+        }
+        failure {
+            echo "Pipeline failed. Check logs above."
+        }
         always {
-            echo "Pipeline finished: ${currentBuild.currentResult}"
+            cleanWs()
         }
     }
 }
